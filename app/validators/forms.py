@@ -1,4 +1,5 @@
-from wtforms import Form
+from wtforms import Form, StringField,IntegerField
+from wtforms.validators import  DataRequired, length
 from app.libs.enums import ClientTypeEnum
 
 class ClientForm(Form):
