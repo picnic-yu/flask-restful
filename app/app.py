@@ -1,13 +1,23 @@
-from flask import Flask
-# 注册蓝图
-def register_blueprints(app):
-    from app.api.v1 import create_blueprint_v1
-    app.register_blueprint(create_blueprint_v1(), url_prefix='/v1')#注册
-def create_app():
-    app = Flask(__name__)
 
-    app.config.from_object('app.config.setting')
-    app.config.from_object('app.config.secure')
+from flask import Flask as _Flask
+from flask.json import JSONEncoder as _JSONEncoder
 
-    register_blueprints(app)
-    return app
+from app.libs.error_code import ServerError
+from datetime import date
+
+
+
+class JSONEncoder(_JSONEncoder):
+    def default(self, o):
+        if hasattr(o, 'keys') and hasattr(o, '__getitem__'):
+            return dict(o)
+        if isinstance(o, date):
+            return o.strftime('%Y-%m-%d')
+        raise ServerError()
+
+
+class Flask(_Flask):
+    json_encoder = JSONEncoder
+
+
+

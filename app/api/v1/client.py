@@ -1,23 +1,29 @@
 
-from app.libs.redprint import Redprint
-from app.validators.forms import ClientForm
-from app.libs.enums import ClientTypeEnum
 from flask import request, jsonify
+
+from app.libs.error_code import ClientTypeError, Success
+from app.libs.redprint import Redprint
+from app.models.user import User
+from app.validators.forms import ClientForm, UserEmailForm
+from app.libs.enums import ClientTypeEnum
+from werkzeug.exceptions import HTTPException
+
+
 api = Redprint('client')
-@api.route('/register',methods=['post'])
+
+
+@api.route('/register', methods=['POST'])
 def create_client():
-    # 注册 登陆
-    # 表单 json
-    # 网页 移动端
-    # 获取数据方式   1. data = request.json 2.request.args.to_dict()
-    data = request.json
-    form = ClientForm(data = data)
-    if form.validate():
-        promise = {
-            ClientTypeEnum.USER_EMAIL:__register_user_by_email
-        }
-    return 'xixihaha'
+    form = ClientForm().validate_for_api()
+    promise = {
+        ClientTypeEnum.USER_EMAIL: __register_user_by_email
+    }
+    promise[form.type.data]()
+    return Success()
 
 
 def __register_user_by_email():
-    pass
+    form = UserEmailForm().validate_for_api()
+    User.register_by_email(form.nickname.data,
+                           form.account.data,
+                           form.secret.data)
